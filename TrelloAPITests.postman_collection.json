@@ -1,0 +1,661 @@
+{
+	"info": {
+		"_postman_id": "82dd61d5-2796-486d-a940-5c751d53fdcc",
+		"name": "TrelloAPITests",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "10909367",
+		"_collection_link": "https://www.postman.com/adityanagpal/workspace/my-workspace/collection/10909367-82dd61d5-2796-486d-a940-5c751d53fdcc?action=share&creator=10909367&source=collection_link"
+	},
+	"item": [
+		{
+			"name": "GetAllBoards",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"// Verify the response status code is 200 OK\r",
+							"pm.test(\"Status code is 200 OK\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"// Parse the response body as JSON\r",
+							"var responseBody = pm.response.json();\r",
+							"\r",
+							"// Count the number of objects in the response array\r",
+							"var numberOfBoards = responseBody.length;\r",
+							"\r",
+							"// Log the count of boards\r",
+							"console.log('No of Boards:', numberOfBoards);\r",
+							"\r",
+							"// Store the id of the first object in the response as a collection variable\r",
+							"pm.collectionVariables.set('boardId', responseBody[0].id);\r",
+							"\r",
+							"\r",
+							"// Extract the IDs using the map function\r",
+							"const existingBoardIds = responseBody.map(obj => obj.id);\r",
+							"\r",
+							"// Set the 'existingBoardIds' collection variable\r",
+							"pm.collectionVariables.set('existingBoardIds', JSON.stringify(existingBoardIds));\r",
+							"\r",
+							"\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseURL}}/1/members/me/boards?key={{key}}&token={{token}}",
+					"host": [
+						"{{baseURL}}"
+					],
+					"path": [
+						"1",
+						"members",
+						"me",
+						"boards"
+					],
+					"query": [
+						{
+							"key": "key",
+							"value": "{{key}}"
+						},
+						{
+							"key": "token",
+							"value": "{{token}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "CreateNewBoard",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"// Verify the response status code is 200 OK\r",
+							"pm.test(\"Status code is 200 OK\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"// Parse the response body as JSON\r",
+							"var responseBody = pm.response.json();\r",
+							"\r",
+							"// Check if the response is an object and has the property 'id'\r",
+							"if (typeof responseBody === 'object' && responseBody.hasOwnProperty('id')) {\r",
+							"    // Set the 'boardId' collection variable with the value of 'id'\r",
+							"    pm.collectionVariables.set('boardId', responseBody.id);\r",
+							"} else {\r",
+							"    // Fail the test if the response is not an object or does not have the 'id' property\r",
+							"    pm.test('Invalid response or missing id property', function () {\r",
+							"        pm.expect.fail('Invalid response or missing id property');\r",
+							"    });\r",
+							"}\r",
+							"\r",
+							"\r",
+							"// Verify if the response is an object\r",
+							"pm.test(\"Response is an object\", function () {\r",
+							"    pm.expect(responseBody).to.be.an('object');\r",
+							"});\r",
+							"\r",
+							"// Verify if the response has an id\r",
+							"pm.test(\"Response has an id\", function () {\r",
+							"    pm.expect(responseBody).to.have.property('id');\r",
+							"});\r",
+							"\r",
+							"// Verify if the response has an attribute idOrganization\r",
+							"pm.test(\"Response has an idOrganization attribute\", function () {\r",
+							"    pm.expect(responseBody).to.have.property('idOrganization');\r",
+							"});\r",
+							"\r",
+							"// Verify if the view types Calendar and Dashboard are set to false\r",
+							"pm.test(\"View types Calendar and Dashboard are set to false\", function () {\r",
+							"    const switcherViews = responseBody.prefs.switcherViews;\r",
+							"    const calendarEnabled = switcherViews.find(view => view.viewType === 'Calendar').enabled;\r",
+							"    const dashboardEnabled = switcherViews.find(view => view.viewType === 'Dashboard').enabled;\r",
+							"\r",
+							"    pm.expect(calendarEnabled).to.be.false;\r",
+							"    pm.expect(dashboardEnabled).to.be.false;\r",
+							"});\r",
+							"\r",
+							"// Verify if the board is private\r",
+							"pm.test(\"Board is private\", function () {\r",
+							"    pm.expect(responseBody.prefs.permissionLevel).to.equal('private');\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"url": {
+					"raw": "{{baseURL}}/1/boards/?key={{key}}&token={{token}}&name={{$randomWord}}",
+					"host": [
+						"{{baseURL}}"
+					],
+					"path": [
+						"1",
+						"boards",
+						""
+					],
+					"query": [
+						{
+							"key": "key",
+							"value": "{{key}}"
+						},
+						{
+							"key": "token",
+							"value": "{{token}}"
+						},
+						{
+							"key": "name",
+							"value": "{{$randomWord}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "GetABoard",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"// Verify the response status code is 200 OK\r",
+							"pm.test(\"Status code is 200 OK\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseURL}}/1/boards/:id/?key={{key}}&token={{token}}",
+					"host": [
+						"{{baseURL}}"
+					],
+					"path": [
+						"1",
+						"boards",
+						":id",
+						""
+					],
+					"query": [
+						{
+							"key": "key",
+							"value": "{{key}}"
+						},
+						{
+							"key": "token",
+							"value": "{{token}}"
+						}
+					],
+					"variable": [
+						{
+							"key": "id",
+							"value": "{{boardId}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "CreateFirstListOnBoard",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"// Verify the response status code is 200 OK\r",
+							"pm.test(\"Status code is 200 OK\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"// Parse the response body as JSON\r",
+							"var responseBody = pm.response.json();\r",
+							"\r",
+							"// Check if the response is an object and has the property 'id'\r",
+							"if (typeof responseBody === 'object' && responseBody.hasOwnProperty('id')) {\r",
+							"    // Set the 'firstListId' environment variable with the value of 'id'\r",
+							"   pm.collectionVariables.set('firstListId', responseBody.id);\r",
+							"} else {\r",
+							"    // Fail the test if the response is not an object or does not have the 'id' property\r",
+							"    pm.test('Invalid response or missing id property', function () {\r",
+							"        pm.expect.fail('Invalid response or missing id property');\r",
+							"    });\r",
+							"}\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"url": {
+					"raw": "{{baseURL}}/1/boards/:id/lists/?key={{key}}&token={{token}}&name={{$randomWord}}",
+					"host": [
+						"{{baseURL}}"
+					],
+					"path": [
+						"1",
+						"boards",
+						":id",
+						"lists",
+						""
+					],
+					"query": [
+						{
+							"key": "key",
+							"value": "{{key}}"
+						},
+						{
+							"key": "token",
+							"value": "{{token}}"
+						},
+						{
+							"key": "name",
+							"value": "{{$randomWord}}"
+						}
+					],
+					"variable": [
+						{
+							"key": "id",
+							"value": "{{boardId}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "CreateSecondListOnBoard",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"// Verify the response status code is 200 OK\r",
+							"pm.test(\"Status code is 200 OK\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"// Parse the response body as JSON\r",
+							"var responseBody = pm.response.json();\r",
+							"\r",
+							"// Check if the response is an object and has the property 'id'\r",
+							"if (typeof responseBody === 'object' && responseBody.hasOwnProperty('id')) {\r",
+							"    // Set the 'firstListId' environment variable with the value of 'id'\r",
+							"    pm.collectionVariables.set('secondListId', responseBody.id);\r",
+							"} else {\r",
+							"    // Fail the test if the response is not an object or does not have the 'id' property\r",
+							"    pm.test('Invalid response or missing id property', function () {\r",
+							"        pm.expect.fail('Invalid response or missing id property');\r",
+							"    });\r",
+							"}"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"url": {
+					"raw": "{{baseURL}}/1/boards/:id/lists/?key={{key}}&token={{token}}&name={{$randomWord}}",
+					"host": [
+						"{{baseURL}}"
+					],
+					"path": [
+						"1",
+						"boards",
+						":id",
+						"lists",
+						""
+					],
+					"query": [
+						{
+							"key": "key",
+							"value": "{{key}}"
+						},
+						{
+							"key": "token",
+							"value": "{{token}}"
+						},
+						{
+							"key": "name",
+							"value": "{{$randomWord}}"
+						}
+					],
+					"variable": [
+						{
+							"key": "id",
+							"value": "{{boardId}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "CreateCardOnList",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"// Verify the response status code is 200 OK\r",
+							"pm.test(\"Status code is 200 OK\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"// Parse the response body as JSON\r",
+							"var responseBody = pm.response.json();\r",
+							"\r",
+							"// Check if the response is an object and has the property 'id'\r",
+							"if (typeof responseBody === 'object' && responseBody.hasOwnProperty('id')) {\r",
+							"    // Set the 'firstListId' collection variable with the value of 'id'\r",
+							"    pm.collectionVariables.set('cardId', responseBody.id);\r",
+							"} else {\r",
+							"    // Fail the test if the response is not an object or does not have the 'id' property\r",
+							"    pm.test('Invalid response or missing id property', function () {\r",
+							"        pm.expect.fail('Invalid response or missing id property');\r",
+							"    });\r",
+							"}"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"url": {
+					"raw": "{{baseURL}}/1/cards/?key={{key}}&token={{token}}&name={{$randomWords}}&idList={{firstListId}}",
+					"host": [
+						"{{baseURL}}"
+					],
+					"path": [
+						"1",
+						"cards",
+						""
+					],
+					"query": [
+						{
+							"key": "key",
+							"value": "{{key}}"
+						},
+						{
+							"key": "token",
+							"value": "{{token}}"
+						},
+						{
+							"key": "name",
+							"value": "{{$randomWords}}"
+						},
+						{
+							"key": "idList",
+							"value": "{{firstListId}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "UpdateCardOnList",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"// Verify the response status code is 200 OK\r",
+							"pm.test(\"Status code is 200 OK\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"url": {
+					"raw": "{{baseURL}}/1/cards/:id/?key={{key}}&token={{token}}&idList={{secondListId}}",
+					"host": [
+						"{{baseURL}}"
+					],
+					"path": [
+						"1",
+						"cards",
+						":id",
+						""
+					],
+					"query": [
+						{
+							"key": "key",
+							"value": "{{key}}"
+						},
+						{
+							"key": "token",
+							"value": "{{token}}"
+						},
+						{
+							"key": "idList",
+							"value": "{{secondListId}}"
+						}
+					],
+					"variable": [
+						{
+							"key": "id",
+							"value": "{{cardId}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "DeleteBoard",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"// Verify the response status code is 200 OK\r",
+							"pm.test(\"Status code is 200 OK\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"// Get the existingBoardIds collection variable\r",
+							"let existingBoardIds = pm.collectionVariables.get('existingBoardIds');\r",
+							"\r",
+							"// Check if existingBoardIds is not null or empty\r",
+							"if (existingBoardIds) {\r",
+							"  // Parse the existingBoardIds as JSON\r",
+							"  existingBoardIds = JSON.parse(existingBoardIds);\r",
+							"\r",
+							"  // Check if the existingBoardIds array is not empty\r",
+							"  if (existingBoardIds.length > 0) {\r",
+							"    // Remove the last ID from the existingBoardIds array\r",
+							"    const boardId = existingBoardIds.pop();\r",
+							"\r",
+							"    // Set the boardId and existingBoardIds collection variables\r",
+							"    pm.collectionVariables.set('boardId', boardId);\r",
+							"    pm.collectionVariables.set('existingBoardIds', JSON.stringify(existingBoardIds));\r",
+							"  }\r",
+							"}\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "{{baseURL}}/1/boards/:id/?key={{key}}&token={{token}}",
+					"host": [
+						"{{baseURL}}"
+					],
+					"path": [
+						"1",
+						"boards",
+						":id",
+						""
+					],
+					"query": [
+						{
+							"key": "key",
+							"value": "{{key}}"
+						},
+						{
+							"key": "token",
+							"value": "{{token}}"
+						}
+					],
+					"variable": [
+						{
+							"key": "id",
+							"value": "{{boardId}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "GetDeletedBoard",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"// Verify the response status code is 200 OK\r",
+							"pm.test(\"Status code is 404 OK\", function () {\r",
+							"    pm.response.to.have.status(404);\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseURL}}/1/boards/:id/?key={{key}}&token={{token}}",
+					"host": [
+						"{{baseURL}}"
+					],
+					"path": [
+						"1",
+						"boards",
+						":id",
+						""
+					],
+					"query": [
+						{
+							"key": "key",
+							"value": "{{key}}"
+						},
+						{
+							"key": "token",
+							"value": "{{token}}"
+						}
+					],
+					"variable": [
+						{
+							"key": "id",
+							"value": "{{boardId}}"
+						}
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "key",
+			"value": "a374bcfdc96173467da6e444f879239a",
+			"type": "string"
+		},
+		{
+			"key": "token",
+			"value": "ATTAb2a6acf0d5a192b4fd98ccca5f5c3b501a6722458e1852d5f2f468d504902442CE7FB5C3",
+			"type": "string"
+		},
+		{
+			"key": "baseURL",
+			"value": "https://api.trello.com"
+		},
+		{
+			"key": "boardId",
+			"value": ""
+		},
+		{
+			"key": "firstListId",
+			"value": ""
+		},
+		{
+			"key": "secondListId",
+			"value": ""
+		},
+		{
+			"key": "cardId",
+			"value": ""
+		},
+		{
+			"key": "existingBoardIds",
+			"value": ""
+		}
+	]
+}
